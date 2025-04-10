@@ -1,5 +1,14 @@
+from django.conf import settings
+from django.shortcuts import render
+from django.urls import reverse
+from django.http import HttpResponse
+from paypal.standard.forms import PayPalPaymentsForm
+import uuid
+
 from django.shortcuts import render,redirect,get_object_or_404
 from django.views import View
+
+
 
 from . models import Customer,Watch,Order,Cart
 from .forms import SignupForm
@@ -14,10 +23,31 @@ from django.contrib.auth import authenticate,login,logout,update_session_auth_ha
 
 
 #===============For Paypal =========================
-from paypal.standard.forms import PayPalPaymentsForm
-from django.conf import settings
-import uuid
-from django.urls import reverse
+def payment(request):
+    host = request.get_host()
+
+    if request.method == 'POST':
+        selected_address_id = request.POST.get('selected_address')
+
+        if not selected_address_id:
+            return HttpResponse("Please select an address before proceeding to payment.", status=400)
+
+        paypal_dict = {
+            'business': settings.PAYPAL_RECEIVER_EMAIL,
+            'amount': '100.00',
+            'item_name': 'Order',
+            'invoice': str(uuid.uuid4()),
+            'currency_code': 'USD',
+            'notify_url': f"http://{host}{reverse('paypal-ipn')}",
+            'return_url': f"http://{host}{reverse('paymentsuccess', args=[selected_address_id])}",
+            'cancel_return': f"http://{host}{reverse('paymentcancel')}",
+        }
+
+        form = PayPalPaymentsForm(initial=paypal_dict)
+        return render(request, 'payment.html', {'paypal': form})  # matching the template
+
+    return render(request, 'select_address.html')
+
 #=========================================================
 
 
@@ -292,6 +322,7 @@ def payment_success(request,selected_address_id):
         Order(user=user,customer=customer_data,Watch=c.product,quantity=c.quantity).save()
         c.delete()
     return render(request,'payment_success.html')
+
 
 
 #===================================== Payment Failed ============================================

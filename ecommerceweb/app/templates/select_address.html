@@ -1,0 +1,22 @@
+{% extends "base.html" %}  <!-- Change base if you're using a different layout -->
+
+{% block content %}
+<h2>Select Address for Payment</h2>
+
+<form method="POST" action="{% url 'payment' %}">
+    {% csrf_token %}
+    
+    {% for a in address %}
+        <div>
+            <input type="radio" name="selected_address" value="{{ a.id }}" required>
+            <strong>{{ a.name }}</strong><br>
+            {{ a.address }}, {{ a.city }}, {{ a.state }} - {{ a.pincode }}
+        </div>
+        <hr>
+    {% empty %}
+        <p>No saved addresses found. <a href="{% url 'address' %}">Mohan green woods Badlapur </a></p>
+    {% endfor %}
+
+    <button type="submit">Proceed to Pay</button>
+</form>
+{% endblock %}
