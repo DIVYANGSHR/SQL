@@ -25,30 +25,30 @@ from django.contrib.auth import authenticate,login,logout,update_session_auth_ha
 
 
 #===============For Paypal =========================
-def payment(request):
-    host = request.get_host()
+# def payment(request):
+#     host = request.get_host()
 
-    if request.method == 'POST':
-        selected_address_id = request.POST.get('selected_address')
+#     if request.method == 'POST':
+#         selected_address_id = request.POST.get('selected_address')
 
-        if not selected_address_id:
-            return HttpResponse("Please select an address before proceeding to payment.", status=400)
+#         if not selected_address_id:
+#             return HttpResponse("Please select an address before proceeding to payment.", status=400)
 
-        paypal_dict = {
-            'business': settings.PAYPAL_RECEIVER_EMAIL,
-            'amount': '100.00',
-            'item_name': 'Order',
-            'invoice': str(uuid.uuid4()),
-            'currency_code': 'USD',
-            'notify_url': f"http://{host}{reverse('paypal-ipn')}",
-            'return_url': f"http://{host}{reverse('paymentsuccess', args=[selected_address_id])}",
-            'cancel_return': f"http://{host}{reverse('paymentcancel')}",
-        }
+#         paypal_dict = {
+#             'business': settings.PAYPAL_RECEIVER_EMAIL,
+#             'amount': '100.00',
+#             'item_name': 'Order',
+#             'invoice': str(uuid.uuid4()),
+#             'currency_code': 'USD',
+#             'notify_url': f"http://{host}{reverse('paypal-ipn')}",
+#             'return_url': f"http://{host}{reverse('paymentsuccess', args=[selected_address_id])}",
+#             'cancel_return': f"http://{host}{reverse('paymentcancel')}",
+#         }
 
-        form = PayPalPaymentsForm(initial=paypal_dict)
-        return render(request, 'app/payment.html', {'paypal': form})  # matching the template
+#         form = PayPalPaymentsForm(initial=paypal_dict)
+#         return render(request, 'app/payment.html', {'paypal': form})  # matching the template
 
-    return render(request, 'select_address.html')
+#     return render(request, 'select_address.html')
 
 #=========================================================
 
@@ -186,15 +186,31 @@ class WatchDetailView(View):
 
 
 #========add to cart==========================
-def add_to_cart(request, id): 
+# def add_to_cart(request, id): 
+#     if request.user.is_authenticated:
+#         product = Watch.objects.get(pk=id) 
+#         user=request.user               
+#         Cart(user=user,product=product).save() 
+#         messages.success(request,'Added to cart succcefully !')
+#         return redirect('watchdetails', id)       
+#     else:
+#         return redirect('login')    
+
+def add_to_cart(request, id):
     if request.user.is_authenticated:
-        product = Watch.objects.get(pk=id) 
-        user=request.user               
-        Cart(user=user,product=product).save() 
-        messages.success(request,'Added to cart succcefully !')
-        return redirect('watchdetails', id)       
+        watch = Watch.objects.get(pk = id)
+        user = request.user
+        cart_item = Cart.objects.filter(user=user, product=watch).first()
+        if cart_item:
+            cart_item.quantity += 1
+            cart_item.save()
+            messages.success(request, 'Quantity updated in cart!')
+        else:
+            Cart(user=user, product=watch).save()
+            messages.success(request, 'Added to cart successfully!')
+        return redirect('watchdetails', id)
     else:
-        return redirect('login')    
+        return redirect('login')
 
 
 #================view cart================================
