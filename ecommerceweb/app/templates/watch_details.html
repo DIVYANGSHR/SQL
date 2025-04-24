@@ -16,9 +16,14 @@
                 <p class="lead text-center">{{watch.small_description}}</p>
                     <div class="text-center">
                         <h4 class="font-weight-bold"><i class="fa-solid fa-indian-rupee-sign"></i>{{watch.discounted_price}} <small class="fw-light rupee"><s>{{watch.selling_price}}</s></small> <small class="text-danger">({{percentage}}% off)</small></h4> 
-                        <a href="{% url 'addtocart' watch.id %}" class="btn btn-info my-2 mr-2">Add to cart</a>    <!-- when we will click on add to cart button, addtocart url will be called along with id of particular pet, then particular pet id will be send to the add_to_cart() in views -->
+                        <a href="{% url 'addtocart' watch.id %}" class="btn btn-info my-2 mr-2">Add to cart</a>  
                         <a href="{% url "buynow" watch.id %}" class="btn btn-success my-2">Buy Now</a>
                     </div>
+                    {% if messages %}
+                    {% for message in messages %}                            
+                        <span {% if message.tags %} class="alert alert-{{message.tags}}" {% endif %}>{{message}}</span> 
+                    {% endfor %}
+            {% endif %}
                 <div class="description">
                 <h2 class="jumbotron-heading mt-5">Description</h2>
                     {{watch.description}}
