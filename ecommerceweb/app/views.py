@@ -218,7 +218,7 @@ def add_to_cart(request, id):
 def view_cart(request):
     cart_items = Cart.objects.filter(user=request.user)     
     total =0
-    delevery_charge =200
+    delevery_charge =150
     for item in cart_items:
         item.product.price_and_quantity_total = item.product.selling_price * item.quantity
         total += item.product.price_and_quantity_total
@@ -306,7 +306,7 @@ def payment(request):
    
 
     total = 0
-    delivery_charge = 250
+    delivery_charge = 150
     for item in cart_items:
         item.product.price_and_quantity_total = item.product.discounted_price * item.quantity
         total += item.product.price_and_quantity_total
@@ -396,7 +396,7 @@ def buynow_payment(request,id):
         selected_address_id = request.POST.get('buynow_selected_address')
 
     watch = Watch.objects.get(pk=id)    
-    delhivery_charge =250
+    delhivery_charge =150
     final_price= delhivery_charge + watch.discounted_price
     
     address = Customer.objects.filter(user=request.user)
